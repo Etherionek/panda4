@@ -27,6 +27,7 @@ public:
 
 private:
     node* root;
+    void splitNode(node *toSplit, node *father);
 };
 
 
