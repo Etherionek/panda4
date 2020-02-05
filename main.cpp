@@ -14,6 +14,10 @@ int main() {
             std::cin >> popularity >> name;
             Tree.insert(popularity, name);
         }
+        else if (command == "S") {
+            std::cin >> popularity;
+            std::cout << BTree.find(popularity) << '\n';
+        }
     }
 
     return 0;

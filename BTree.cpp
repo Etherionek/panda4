@@ -87,3 +87,25 @@ void BTree::splitNode(node *toSplit, node *father) {
 	father->sons[i + 1] = newSon;
 	++father->keysCounter;
 }
+
+std::string BTree::find(int popularity) {
+    if (root == nullptr)
+        return "-";
+    return search(popularity, root);
+}
+
+
+std::string BTree::search(int &popularity, node *tmp) {
+    int index;
+    for (index = 0; index < tmp->keysCounter; ++index) {
+        if (popularity <= tmp->keys[index].first)
+            break;
+    }
+
+    if (tmp->keys[index].first == popularity && index < tmp->keysCounter)
+        return tmp->keys[index].second;
+    else if (tmp->isLeaf)
+        return "-";
+    else
+        return search(popularity, tmp->sons[index]);
+}

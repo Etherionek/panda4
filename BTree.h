@@ -28,6 +28,7 @@ public:
 private:
     node* root;
     void splitNode(node *toSplit, node *father);
+    std::string search(int &popularity, node *tmp);
 };
 
 
