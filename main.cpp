@@ -18,6 +18,10 @@ int main() {
             std::cin >> popularity;
             std::cout << BTree.find(popularity) << '\n';
         }
+        else if (command == "R") {
+            std::cin >> popularity;
+            BTree.erase(popularity);
+        }
     }
 
     return 0;
