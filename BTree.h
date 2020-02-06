@@ -22,13 +22,17 @@ public:
     BTree();
     ~BTree();
     void insert(const int &popularity, const std::string &name);
-    void erase();
+    void erase(int popularity);
     std::string find(int popularity);
 
 private:
     node* root;
     void splitNode(node *toSplit, node *father);
     std::string search(int &popularity, node *tmp);
+    void erase(int &popularity, node *tmp);
+    void joinNodes(node *father, int leftSonIndex);
+    void moveKeyLtoR(node *father, int lSonIndex);
+    void moveKeyRtoL(node *father, int lSonIndex);
 };
 
 
