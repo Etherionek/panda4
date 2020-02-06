@@ -109,3 +109,79 @@ std::string BTree::search(int &popularity, node *tmp) {
     else
         return search(popularity, tmp->sons[index]);
 }
+
+
+void BTree::joinNodes(node *father, int leftSonIndex) {
+    node *lSon = father->sons[leftSonIndex];
+    node *rSon = father->sons[leftSonIndex + 1];
+
+    //ojciec
+    lSon->keys[lSon->keysCounter] = father->keys[leftSonIndex];
+    ++lSon->keysCounter;
+
+    for (int i = leftSonIndex; i < father->keysCounter - 1; ++i)
+        father->keys[i] = father->keys[i + 1];
+
+    for (int i = leftSonIndex + 1; i < father->keysCounter; ++i)
+        father->sons[i] = father->sons[i + 1];
+
+    --father->keysCounter;
+
+    //prawy syn ojca
+    for (int i = 0; i < rSon->keysCounter; ++i) {
+        lSon->keys[lSon->keysCounter] = rSon->keys[i];
+        lSon->sons[lSon->keysCounter] = rSon->sons[i];
+        ++lSon->keysCounter;
+    }
+    lSon->sons[lSon->keysCounter] = rSon->sons[rSon->keysCounter];
+}
+
+void BTree::moveKeyLtoR(node *father, int lSonIndex) {
+    node *lson = father->sons[lSonIndex];
+    node *rson = father->sons[lSonIndex + 1];
+    auto fatherValue = father->keys[lSonIndex];
+
+    //prawy syn
+    for (int i = rson->keysCounter; i > 0; --i)
+        rson->keys[i] = rson->keys[i - 1];
+
+    rson->keys[0] = fatherValue;
+
+    if (!rson->isLeaf) {
+        for (int i = rson->keysCounter + 1; i > 0; --i) {
+            rson->sons[i] = rson->sons[i - 1];
+        }
+        rson->sons[0] = lson->sons[lson->keysCounter];
+    }// sprawdzic synow
+
+    ++rson->keysCounter;
+
+    //ojciec
+    father->keys[lSonIndex] = lson->keys[lson->keysCounter - 1];
+
+    //lewy syn
+    --lson->keysCounter;
+}
+
+void BTree::moveKeyRtoL(node *father, int lSonIndex) {
+    node *rson = father->sons[lSonIndex + 1];
+    node *lson = father->sons[lSonIndex];
+
+    //lewy syn
+    lson->keys[lson->keysCounter] = father->keys[lSonIndex];
+    lson->sons[lson->keysCounter + 1] = rson->sons[0];
+    ++lson->keysCounter;
+
+    //ojciec
+    father->keys[lSonIndex] = rson->keys[0];
+
+    //prawy syn
+    for (int i = 0; i < rson->keysCounter - 1; ++i)
+        rson->keys[i] = rson->keys[i + 1];
+
+    if (!rson->isLeaf)
+        for (int i = 0; i < rson->keysCounter; ++i)
+            rson->sons[i] = rson->sons[i + 1];
+
+    --rson->keysCounter;
+}
