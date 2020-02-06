@@ -110,6 +110,92 @@ std::string BTree::search(int &popularity, node *tmp) {
         return search(popularity, tmp->sons[index]);
 }
 
+void BTree::erase(int popularity) {
+    if (root == nullptr)
+        return;
+
+    erase(popularity, root);
+
+    if (root->keysCounter == 0) {
+        if (root->isLeaf) {
+            delete root;
+            root = nullptr;
+        }
+        else {
+            auto toDelete = root;
+            root = root->sons[0];
+            delete toDelete;
+        }
+    }
+}
+
+void BTree::erase(int &popularity, node *tmp) {
+  if (tmp == nullptr)
+      return;
+
+  int index;
+  for (index = 0; index < tmp->keysCounter; ++index) {
+      if (popularity <= tmp->keys[index].first)
+          break;
+  }
+
+  if (index != tmp->keysCounter && popularity == tmp->keys[index].first) {
+      if (tmp->isLeaf) {
+          for (; index < tmp->keysCounter - 1; ++index)
+              tmp->keys[index] = tmp->keys[index + 1];
+
+          --tmp->keysCounter;
+      }
+      else {
+          node *son;
+          if (tmp->sons[index]->keysCounter >= T) {
+              son = tmp->sons[index];
+
+              node *prev = son;
+              while (!prev->isLeaf)
+                  prev = prev->sons[prev->keysCounter];
+
+              son = prev;
+
+              std::swap(tmp->keys[index], son->keys[son->keysCounter - 1]);
+              erase(popularity, son);
+          }
+          else if (tmp->sons[index + 1]->keysCounter >= T) { //prawy syn
+              son = tmp->sons[index + 1];
+
+              node *next = son;
+              while (!next->isLeaf)
+                  next = next->sons[0];
+
+              son = next;
+
+              std::swap(tmp->keys[index], son->keys[0]);
+              erase(popularity, son);
+          }
+          else {
+              joinNodes(tmp, index);
+              erase(popularity, tmp->sons[index]);
+          }
+      }
+  }
+  else if (!tmp->isLeaf) {
+      if (index == tmp->keysCounter) {
+          if (tmp->sons[index - 1]->keysCounter == T - 1 && tmp->sons[index]->keysCounter == T - 1) {
+              joinNodes(tmp, index - 1);
+              --index;
+          }
+          else if (tmp->sons[index - 1]->keysCounter >= T && tmp->sons[index]->keysCounter == T - 1)
+              moveKeyLtoR(tmp, index - 1);
+      }
+      else {
+          if (tmp->sons[index]->keysCounter == T - 1 && tmp->sons[index + 1]->keysCounter == T - 1)
+              joinNodes(tmp, index);
+          else if (tmp->sons[index]->keysCounter == T - 1 && tmp->sons[index + 1]->keysCounter >= T)
+              moveKeyRtoL(tmp, index);
+      }
+      erase(popularity, tmp->sons[index]);
+  }
+}
 
 void BTree::joinNodes(node *father, int leftSonIndex) {
     node *lSon = father->sons[leftSonIndex];
